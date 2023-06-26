@@ -24,8 +24,7 @@ func retrieve_ip(pool chan string, filename string) {
 	cnt := 0
 	f, err := os.Open(filename)
 	if err != nil {
-		fmt.Printf("cannot open file %s\n", filename)
-		return
+		panic(err)
 	}
 	fmt.Println("sending msg ...")
 	reader := bufio.NewReader(f)
@@ -104,7 +103,7 @@ func store_data(pool chan Data, wg *sync.WaitGroup) {
 	wg.Done()
 }
 
-func Get_upstream_file(filename string, prober_num int) {
+func Get_upstream_file(filename string, output string, prober_num int) {
 	dataset = map[string][]string{}
 	ip_pool := make(chan string, 500)
 	data_pool := make(chan Data, 200)
@@ -117,7 +116,7 @@ func Get_upstream_file(filename string, prober_num int) {
 	probe_tasks.Wait()
 	close(data_pool)
 	store_task.Wait()
-	utils.OutputJSON(dataset)
+	utils.OutputJSON(dataset, output)
 }
 
 func Get_upstream_ip(ip string) {
@@ -129,5 +128,5 @@ func Get_upstream_ip(ip string) {
 		temp = append(temp, rdns)
 	}
 	dataset[data.target] = temp
-	utils.OutputJSON(dataset)
+	utils.OutputJSON(dataset, "-")
 }
